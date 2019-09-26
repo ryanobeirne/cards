@@ -1,12 +1,49 @@
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
+mod game;
+mod deal;
 mod display;
+
+pub use deal::*;
+pub use game::*;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub struct Card {
     pub value: Value,
     pub suit: Suit,
+}
+
+impl Card {
+    pub fn cmp_value(&self) -> u8 {
+        match self.value {
+            Value::Two   => 2,
+            Value::Three => 3,
+            Value::Four  => 4,
+            Value::Five  => 5,
+            Value::Six   => 6,
+            Value::Seven => 7,
+            Value::Eight => 8,
+            Value::Nine  => 9,
+            Value::Ten   => 10,
+            Value::Jack  => 11,
+            Value::Queen => 12,
+            Value::King  => 13,
+            Value::Ace   => 13,
+        }
+    }
+}
+
+impl Ord for Card {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.cmp_value().cmp(&other.cmp_value())
+    }
+}
+
+impl PartialOrd for Card {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 impl Default for Card {
@@ -92,7 +129,7 @@ impl PartialEq for Deck {
     fn eq(&self, other: &Self) -> bool {
         self.len() == other.len()
             && self.cards()
-                .zip(other.cards.iter())
+                .zip(other.cards())
                 .all(|(s, o)| s == o)
     }
 }
@@ -101,7 +138,7 @@ impl Eq for Deck {}
 
 impl Deck {
     pub fn new() -> Self {
-        Deck::default()
+        Deck::default().shuffled()
     }
 
     pub fn len(&self) -> usize {
@@ -125,6 +162,62 @@ impl Deck {
     }
 }
 
+impl IntoIterator for Deck {
+    type Item = Card;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.cards.into_iter()
+    }
+}
+
+#[derive(Clone)]
+pub struct Hand {
+    cards: Vec<Card>,
+}
+
+impl Hand {
+    pub fn new() -> Self {
+        Hand { cards: Vec::new() }
+    }
+
+    pub fn len(&self) -> usize {
+        self.cards.len()
+    }
+
+    pub fn cards<'a>(&'a self) -> Cards<'a> {
+        Cards {
+            cards: self.cards.iter().collect(),
+            index: 0,
+        }
+    }
+
+    pub fn cards_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, Card> {
+        self.cards.iter_mut()
+    }
+}
+
+impl IntoIterator for Hand {
+    type Item = Card;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.cards.into_iter()
+    }
+}
+
+impl PartialEq for Hand {
+    fn eq(&self, other: &Self) -> bool {
+        self.len() == other.len()
+            && self.cards()
+                .zip(other.cards())
+                .all(|(s, o)| s == o)
+    }
+}
+
+impl Eq for Hand {}
+
+/// The iterator over `Cards`: by calling `.cards()`
 pub struct Cards<'a> {
     cards: Vec<&'a Card>,
     index: usize,

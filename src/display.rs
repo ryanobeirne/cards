@@ -48,7 +48,23 @@ impl fmt::Display for Suit {
 
 impl fmt::Debug for Deck {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut cards_iter = self.cards.iter().peekable();
+        let mut cards_iter = self.cards().peekable();
+        let mut cards = String::new();
+
+        while let Some(card) = cards_iter.next() {
+            cards.push_str(&card.to_string());
+            if let Some(_) = cards_iter.peek() {
+                cards.push_str(", ");
+            }
+        }
+
+        write!(f, "[{}]", cards)
+    }
+}
+
+impl fmt::Debug for Hand {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut cards_iter = self.cards().peekable();
         let mut cards = String::new();
 
         while let Some(card) = cards_iter.next() {

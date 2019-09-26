@@ -8,3 +8,7 @@ edition = "2018"
 
 [dependencies]
 rand = "0.7.2"
+
+[[bin]]
+name = "war"
+path = "bin/war.rs"
