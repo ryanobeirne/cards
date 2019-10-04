@@ -13,19 +13,19 @@ impl fmt::Display for Value {
             f,
             "{}",
             match self {
-                Value::Two => "2",
+                Value::Two   => "2",
                 Value::Three => "3",
-                Value::Four => "4",
-                Value::Five => "5",
-                Value::Six => "6",
+                Value::Four  => "4",
+                Value::Five  => "5",
+                Value::Six   => "6",
                 Value::Seven => "7",
                 Value::Eight => "8",
-                Value::Nine => "9",
-                Value::Ten => "10",
-                Value::Jack => "J",
+                Value::Nine  => "9",
+                Value::Ten   => "10",
+                Value::Jack  => "J",
                 Value::Queen => "Q",
-                Value::King => "K",
-                Value::Ace => "A",
+                Value::King  => "K",
+                Value::Ace   => "A",
             }
         )
     }
@@ -37,14 +37,30 @@ impl fmt::Display for Suit {
             f,
             "{}",
             match self {
-                Suit::Clubs => '♣',
+                Suit::Clubs    => '♣',
                 Suit::Diamonds => '♦',
-                Suit::Hearts => '♥',
-                Suit::Spades => '♠',
+                Suit::Hearts   => '♥',
+                Suit::Spades   => '♠',
             }
         )
     }
 }
+
+impl fmt::Debug for Suit {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Suit::Clubs    => 'C',
+                Suit::Diamonds => 'D',
+                Suit::Hearts   => 'H',
+                Suit::Spades   => 'S',
+            }
+        )
+    }
+}
+
 
 impl fmt::Debug for Deck {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

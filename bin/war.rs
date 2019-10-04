@@ -30,6 +30,10 @@ fn play_game() -> (usize, usize, usize, usize) {
 
     println!("Player {} wins with {} wars in {} rounds!", player, war_count, rounds);
 
+    // Test that all cards are unique
+    assert!(game.hands[0].are_unique());
+    assert!(game.hands[1].are_unique());
+
     (player, win_len, rounds, war_count)
 }
 

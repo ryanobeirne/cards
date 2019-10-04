@@ -1,20 +1,26 @@
-use rand::seq::SliceRandom;
-use rand::thread_rng;
-
 mod game;
 mod deal;
 mod display;
+mod cards;
+mod shuffle;
 
 pub use deal::*;
 pub use game::*;
+pub use crate::cards::*;
+pub use crate::shuffle::*;
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone)]
 pub struct Card {
     pub value: Value,
     pub suit: Suit,
 }
 
 impl Card {
+    fn new(value: Value, suit: Suit) -> Self {
+        Card { value, suit, }
+    }
+
+    /// The value for comparing two cards
     pub fn cmp_value(&self) -> u8 {
         match self.value {
             Value::Two   => 2,
@@ -29,10 +35,18 @@ impl Card {
             Value::Jack  => 11,
             Value::Queen => 12,
             Value::King  => 13,
-            Value::Ace   => 13,
+            Value::Ace   => 14,
         }
     }
 }
+
+impl PartialEq for Card {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value && self.suit == other.suit
+    }
+}
+
+impl Eq for Card {}
 
 impl Ord for Card {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
@@ -55,7 +69,7 @@ impl Default for Card {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Value {
     Two,
     Three,
@@ -93,12 +107,24 @@ impl From<u8> for Value {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub enum Suit {
-    Clubs,
+    ///♦
     Diamonds,
+    ///♣
+    Clubs,
+    ///♥
     Hearts,
+    ///♠
     Spades,
+}
+
+#[test]
+fn suit_ord() {
+    use Suit::*;
+    let mut cards = vec![Clubs, Spades, Diamonds, Hearts];
+    cards.sort();
+    assert_eq!(cards, vec![Diamonds, Clubs, Hearts, Spades]);
 }
 
 #[derive(Clone)]
@@ -112,11 +138,7 @@ impl Default for Deck {
 
         for suit in [Suit::Spades, Suit::Clubs, Suit::Hearts, Suit::Diamonds].iter() {
             for value in 1..=13 {
-                let card = Card {
-                    value: Value::from(value),
-                    suit: *suit,
-                };
-
+                let card = Card::new(Value::from(value), *suit);
                 cards.push(card);
             }
         }
@@ -145,30 +167,6 @@ impl Deck {
         self.cards.len()
     }
 
-    pub fn shuffle(&mut self) {
-        self.cards.shuffle(&mut thread_rng());
-    }
-
-    pub fn shuffled(mut self) -> Self {
-        self.cards.shuffle(&mut thread_rng());
-        self
-    }
-
-    pub fn cards<'a>(&'a self) -> Cards<'a> {
-        Cards {
-            cards: self.cards.iter().collect(),
-            index: 0,
-        }
-    }
-}
-
-impl IntoIterator for Deck {
-    type Item = Card;
-    type IntoIter = std::vec::IntoIter<Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.cards.into_iter()
-    }
 }
 
 #[derive(Clone)]
@@ -183,17 +181,6 @@ impl Hand {
 
     pub fn len(&self) -> usize {
         self.cards.len()
-    }
-
-    pub fn cards<'a>(&'a self) -> Cards<'a> {
-        Cards {
-            cards: self.cards.iter().collect(),
-            index: 0,
-        }
-    }
-
-    pub fn cards_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, Card> {
-        self.cards.iter_mut()
     }
 }
 
@@ -216,25 +203,6 @@ impl PartialEq for Hand {
 }
 
 impl Eq for Hand {}
-
-/// The iterator over `Cards`: by calling `.cards()`
-pub struct Cards<'a> {
-    cards: Vec<&'a Card>,
-    index: usize,
-}
-
-impl<'a> Iterator for Cards<'a> {
-    type Item = &'a Card;
-    fn next(&mut self) -> Option<Self::Item> {
-        let card = self.cards.get(self.index);
-        self.index += 1;
-
-        match card {
-            Some(c) => Some(*c),
-            None => None,
-        }
-    }
-}
 
 /// Check that the default deck doesn't panic
 #[test]
