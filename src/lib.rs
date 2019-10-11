@@ -13,7 +13,7 @@ pub use game::*;
 pub use shuffle::*;
 
 /// The playing card
-#[derive(Debug, Copy, Clone, Hash)]
+#[derive(Copy, Clone, Hash)]
 pub struct Card {
     pub value: Value,
     pub suit: Suit,
@@ -74,7 +74,7 @@ impl Default for Card {
 }
 
 /// The face value of a card
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub enum Value {
     Two,
     Three,
@@ -112,23 +112,23 @@ impl From<u8> for Value {
     }
 }
 
-impl TryFrom<char> for Value {
+impl TryFrom<&str> for Value {
     type Error = io::Error;
-    fn try_from(c: char) -> Result<Value, Self::Error> {
-        let value = match c {
-            '2' => Value::Two,
-            '3' => Value::Three,
-            '4' => Value::Four,
-            '5' => Value::Five,
-            '6' => Value::Six,
-            '7' => Value::Seven,
-            '8' => Value::Eight,
-            '9' => Value::Nine,
-            '0' => Value::Ten,
-            'J'|'j' => Value::Jack,
-            'Q'|'q' => Value::Queen,
-            'K'|'k' => Value::King,
-            'A'|'a'|'1' => Value::Ace,
+    fn try_from(s: &str) -> Result<Value, Self::Error> {
+        let value = match s {
+            "2" => Value::Two,
+            "3" => Value::Three,
+            "4" => Value::Four,
+            "5" => Value::Five,
+            "6" => Value::Six,
+            "7" => Value::Seven,
+            "8" => Value::Eight,
+            "9" => Value::Nine,
+            "0"|"10"|"T"|"t" => Value::Ten,
+            "J"|"j" => Value::Jack,
+            "Q"|"q" => Value::Queen,
+            "K"|"k" => Value::King,
+            "A"|"a"|"1" => Value::Ace,
             _ => return Err(io::Error::from(io::ErrorKind::InvalidInput)),
         };
 

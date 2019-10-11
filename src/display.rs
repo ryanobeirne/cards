@@ -8,6 +8,12 @@ impl fmt::Display for Card {
     }
 }
 
+impl fmt::Debug for Card {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}{:?}", self.value, self.suit)
+    }
+}
+
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
@@ -29,6 +35,12 @@ impl fmt::Display for Value {
                 Value::Ace   => "A",
             }
         )
+    }
+}
+
+impl fmt::Debug for Value {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self)
     }
 }
 

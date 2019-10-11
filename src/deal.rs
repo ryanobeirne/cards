@@ -1,6 +1,5 @@
 use super::*;
 use std::fmt;
-//use std::option::NoneError;
 
 pub type DealResult<T> = Result<T, DealError>;
 
