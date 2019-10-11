@@ -2,7 +2,7 @@ use super::*;
 use std::collections::HashMap;
 
 #[test]
-fn test_war() {
+fn test_war() -> Result<(), Box<dyn std::error::Error>> {
     const ITERATIONS: usize = 100_000;
 
     // (KEY = THING, VAL = COUNT)
@@ -14,7 +14,7 @@ fn test_war() {
 
     // Play the game 10000 times
     for _i in 0..ITERATIONS {
-        let (winner, win_len, rounds, war_count) = play_game();
+        let (winner, win_len, rounds, war_count) = play_game()?;
         // Winner must have all 52 cards
         assert_eq!(win_len, 52);
 
@@ -67,6 +67,8 @@ fn test_war() {
     println!("Med Round Length: {:5} Rounds ({} games)", med_round_len, med_round_count);
     println!("Avg Round Length: {:5} Rounds ({} games)", avg_rounds.round(), get_closest(&round_len_counter, avg_rounds.round() as usize));
     println!("Min Round Length: {:5} Rounds ({} games)", min_round_len, min_round_count);
+
+    Ok(())
 }
 
 fn get_closest(map: &HashMap<usize, usize>, val: usize) -> usize {

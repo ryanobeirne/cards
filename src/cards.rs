@@ -1,5 +1,8 @@
+//! An iterator over a collection of cards
+
 use super::*;
 
+/// The iterator over a collectoin of cards
 pub trait Cards<'a> {
     fn cards(&'a self) -> CardIter<'a>;
 

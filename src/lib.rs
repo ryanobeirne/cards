@@ -1,15 +1,19 @@
+use std::convert::TryFrom;
+use std::io;
+
 mod game;
 mod deal;
 mod display;
 mod cards;
 mod shuffle;
 
+pub use crate::cards::*;
 pub use deal::*;
 pub use game::*;
-pub use crate::cards::*;
-pub use crate::shuffle::*;
+pub use shuffle::*;
 
-#[derive(Debug, Copy, Clone)]
+/// The playing card
+#[derive(Debug, Copy, Clone, Hash)]
 pub struct Card {
     pub value: Value,
     pub suit: Suit,
@@ -69,7 +73,8 @@ impl Default for Card {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
+/// The face value of a card
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub enum Value {
     Two,
     Three,
@@ -107,7 +112,33 @@ impl From<u8> for Value {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd)]
+impl TryFrom<char> for Value {
+    type Error = io::Error;
+    fn try_from(c: char) -> Result<Value, Self::Error> {
+        let value = match c {
+            '2' => Value::Two,
+            '3' => Value::Three,
+            '4' => Value::Four,
+            '5' => Value::Five,
+            '6' => Value::Six,
+            '7' => Value::Seven,
+            '8' => Value::Eight,
+            '9' => Value::Nine,
+            '0' => Value::Ten,
+            'J'|'j' => Value::Jack,
+            'Q'|'q' => Value::Queen,
+            'K'|'k' => Value::King,
+            'A'|'a'|'1' => Value::Ace,
+            _ => return Err(io::Error::from(io::ErrorKind::InvalidInput)),
+        };
+
+        Ok(value)
+    }
+}
+
+/// The suit of a card
+/// (♦Diamonds, ♣Clubs, ♥Hearts, ♠Spades)
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub enum Suit {
     ///♦
     Diamonds,
@@ -167,8 +198,13 @@ impl Deck {
         self.cards.len()
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.cards.is_empty()
+    }
+
 }
 
+/// A hand of playing cards
 #[derive(Clone)]
 pub struct Hand {
     cards: Vec<Card>,
@@ -181,6 +217,20 @@ impl Hand {
 
     pub fn len(&self) -> usize {
         self.cards.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.cards.is_empty()
+    }
+
+    pub fn cards_mut<'a>(&'a mut self) -> std::slice::IterMut<'a, Card> {
+        self.cards.iter_mut()
+    }
+
+    pub fn drain(&mut self) -> Hand {
+        Hand {
+            cards: self.cards.drain(0..self.len()).collect()
+        }
     }
 }
 

@@ -11,4 +11,8 @@ rand = "0.7.2"
 
 [[bin]]
 name = "war"
-path = "bin/war.rs"
+path = "bin/war/main.rs"
+
+[[bin]]
+name = "gofish"
+path = "bin/gofish/main.rs"

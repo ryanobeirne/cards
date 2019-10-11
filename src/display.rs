@@ -1,3 +1,4 @@
+//! Definitions for how to display cards
 use super::*;
 use std::fmt;
 
