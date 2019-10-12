@@ -1,10 +1,10 @@
 use cards::*;
 
 use std::collections::{BTreeMap, HashMap};
-use std::io::{stdout, stdin, Write};
 use std::convert::TryFrom;
-use std::fmt;
 use std::error::Error;
+use std::fmt;
+use std::io::{stdin, stdout, Write};
 
 type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
@@ -52,9 +52,13 @@ fn play_game(n_players: usize) -> Result<Player> {
 
     dbg!(&game);
 
-    match game.players.into_iter().max_by(|a,b| a.paired.len().cmp(&b.paired.len())) {
+    match game
+        .players
+        .into_iter()
+        .max_by(|a, b| a.paired.len().cmp(&b.paired.len()))
+    {
         Some(player) => Ok(player),
-        None => Err(Box::new(NoWinner))
+        None => Err(Box::new(NoWinner)),
     }
 }
 
@@ -76,7 +80,7 @@ impl Player {
 
     fn discard_pairs(&mut self) -> DealResult<usize> {
         let mut pairs: HashMap<Value, usize> = HashMap::new();
-        
+
         for card in self.hand.cards() {
             *pairs.entry(card.value).or_insert(0) += 1;
         }
@@ -84,7 +88,11 @@ impl Player {
         for (value, count) in pairs.iter().filter(|(_value, count)| **count > 1_usize) {
             let len = count - (count % 2);
             for _i in 0..len {
-                let index = self.hand.cards().position(|card| card.value == *value).expect("The card should be here!");
+                let index = self
+                    .hand
+                    .cards()
+                    .position(|card| card.value == *value)
+                    .expect("The card should be here!");
                 self.hand.deal(index, &mut self.paired)?;
             }
         }
@@ -97,7 +105,9 @@ impl Player {
     }
 
     fn match_cards_from_value<V: Into<Value> + Copy>(&self, value: V) -> MatchIndex<Card> {
-        self.hand.cards().enumerate()
+        self.hand
+            .cards()
+            .enumerate()
             .filter(|(_, card)| card.value == value.into())
             .map(|(i, card)| (i, card.clone()))
             .collect()
@@ -106,7 +116,7 @@ impl Player {
 
 #[derive(Debug)]
 struct MatchIndex<T> {
-    matches: BTreeMap<usize, T>
+    matches: BTreeMap<usize, T>,
 }
 
 impl<T> MatchIndex<T> {
@@ -119,9 +129,9 @@ impl<T> MatchIndex<T> {
 }
 
 impl<T> std::iter::FromIterator<(usize, T)> for MatchIndex<T> {
-    fn from_iter<I: IntoIterator<Item=(usize, T)>>(iter: I) -> Self {
-        MatchIndex{
-            matches: iter.into_iter().collect()
+    fn from_iter<I: IntoIterator<Item = (usize, T)>>(iter: I) -> Self {
+        MatchIndex {
+            matches: iter.into_iter().collect(),
         }
     }
 }
@@ -139,12 +149,11 @@ impl FishGame {
             players.push(Player::new(&format!("Player{}", n)));
         }
 
-        Ok(
-            FishGame {
-                river: Deck::new(),
-                players,
-            }.first_deal()?
-        )
+        Ok(FishGame {
+            river: Deck::new(),
+            players,
+        }
+        .first_deal()?)
     }
 
     // Deal 5 cards to each player
@@ -171,17 +180,18 @@ impl FishGame {
         );
 
         let matches = self.players[index.next].match_cards_from_value(value);
-        
+
         match matches.first() {
             Some((i, card)) => {
                 println!("Here you go! [{}]", card);
                 let card = self.players[index.next].give(*i)?;
                 self.players[index.current].take(card);
-            },
+            }
             None => {
                 let card = self.go_fish();
+                println!("Caught one! [{}]", card);
                 self.players[index.current].take(card);
-            },
+            }
         }
 
         self.players[index.current].discard_pairs()?;
@@ -216,10 +226,10 @@ fn ask_user_index<W: Write>(w: &mut W, limit: usize) -> usize {
                 eprintln!("Index out of bounds!");
                 ask_user_index(w, limit)
             }
-        },
+        }
         Err(_) => ask_user_index(w, limit),
     }
-} 
+}
 
 fn user_ask_value<W: Write>(w: &mut W, player: &Player, next: &Player) -> Value {
     write!(w, "{}: Ask {} for a card value: ", player.name, next.name).expect("write");
@@ -227,7 +237,7 @@ fn user_ask_value<W: Write>(w: &mut W, player: &Player, next: &Player) -> Value 
 
     let mut input = String::new();
     stdin().read_line(&mut input).expect("stdin");
-        
+
     match Value::try_from(input.trim()) {
         Ok(v) => {
             if player.has_value(v) {
@@ -236,13 +246,12 @@ fn user_ask_value<W: Write>(w: &mut W, player: &Player, next: &Player) -> Value 
                 writeln!(w, "You don't have that card!").expect("write");
                 user_ask_value(w, player, next)
             }
-        },
+        }
         Err(_) => {
             writeln!(w, "Invalid card value!").expect("write");
             user_ask_value(w, player, next)
-        },
+        }
     }
-
 }
 
 impl Take for Player {
