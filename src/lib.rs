@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::convert::TryFrom;
 use std::io;
 
@@ -253,6 +254,28 @@ impl PartialEq for Hand {
 }
 
 impl Eq for Hand {}
+
+#[derive(Debug)]
+pub  struct MatchIndex<T> {
+    pub matches: BTreeMap<usize, T>,
+}
+
+impl<T> MatchIndex<T> {
+    pub fn first(&self) -> Option<(&usize, &T)> {
+        match self.matches.iter().nth(0) {
+            Some((i, t)) => Some((i, t)),
+            None => None,
+        }
+    }
+}
+
+impl<T> std::iter::FromIterator<(usize, T)> for MatchIndex<T> {
+    fn from_iter<I: IntoIterator<Item = (usize, T)>>(iter: I) -> Self {
+        MatchIndex {
+            matches: iter.into_iter().collect(),
+        }
+    }
+}
 
 /// Check that the default deck doesn't panic
 #[test]
