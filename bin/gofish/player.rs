@@ -1,18 +1,23 @@
 use super::*;
+use std::io;
+
+pub use PlayerType::*;
 
 #[derive(Debug)]
 pub struct Player {
     pub name: String,
     pub hand: Hand,
     pub paired: Hand,
+    pub player_type: PlayerType,
 }
 
 impl Player {
-    pub fn new(name: &str) -> Self {
+    pub fn new(name: &str, player_type: PlayerType) -> Self {
         Player {
             name: name.into(),
             hand: Hand::new(),
             paired: Hand::new(),
+            player_type,
         }
     }
 
@@ -50,6 +55,10 @@ impl Player {
             .map(|(i, card)| (i, card.clone()))
             .collect()
     }
+
+    pub fn say<W: Write, D: fmt::Display>(&self, w: &mut W, d: D) -> io::Result<()> {
+        write!(w, "{}: \"{}\"", self.name, d)
+    }
 }
 
 impl Take for Player {
@@ -64,6 +73,12 @@ impl Give for Player {
     fn give(&mut self, index: usize) -> DealResult<Self::Item> {
         self.hand.give(index)
     }
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum PlayerType {
+    Human,
+    Computer,
 }
 
 pub struct PlayerIndex {

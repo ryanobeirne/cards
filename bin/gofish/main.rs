@@ -28,12 +28,12 @@ fn play_game(n_players: usize) -> Result<Player> {
 
     let mut player_index = PlayerIndex::new(game.players.len());
     while !game.has_empty_hand() {
-        dbg!(&game);
+        println!("{}", &game);
         game.turn(&player_index)?;
         player_index.increment();
     }
 
-    dbg!(&game);
+    println!("{}", &game);
 
     match game
         .players
